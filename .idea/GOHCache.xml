@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="schemaMapping">
+      <map>
+        <entry key="CourierStockDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CreateProductDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ProductCategoryDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ProductDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Repository">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/auth-service/pkg/auth/repository.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StockSummaryDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="UpdateProductDTO">
+          <value>
+            <set>
+              <option value="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$USER_HOME$/GolandProjects/auth-service/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751742068975" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/auth-service/pkg/auth/repository.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751726353915" />
+              <option name="schema">
+                <list>
+                  <option value="Repository" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/api/handlers/image_handlers.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751737488120" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/api/handlers/subcategories_handlers.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751728157126" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/api/routes/router.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751744398360" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751736822246" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/pkg/dto/product.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751738712852" />
+              <option name="schema">
+                <list>
+                  <option value="CourierStockDTO" />
+                  <option value="StockSummaryDTO" />
+                  <option value="ProductCategoryDTO" />
+                  <option value="ProductDTO" />
+                  <option value="CreateProductDTO" />
+                  <option value="UpdateProductDTO" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/pkg/manager/products_repository.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751744132437" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/GolandProjects/catalog-service/pkg/manager/subcategories_repository.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1751728187137" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="tableStructMapping">
+      <map>
+        <entry key="courier_stock_dto" value="CourierStockDTO" />
+        <entry key="create_product_dto" value="CreateProductDTO" />
+        <entry key="product_category_dto" value="ProductCategoryDTO" />
+        <entry key="product_dto" value="ProductDTO" />
+        <entry key="repository" value="Repository" />
+        <entry key="stock_summary_dto" value="StockSummaryDTO" />
+        <entry key="update_product_dto" value="UpdateProductDTO" />
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1751719712770" />
+  </component>
+</project>

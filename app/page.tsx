@@ -17,13 +17,15 @@ export default function AdminPanel() {
 
   if (isLoading) {
     return (
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>q
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-lg">Загрузка...</div>
         </div>
       </ThemeProvider>
     )
   }
+
+
 
   if (!isAuthenticated || !user) {
     return (
@@ -35,7 +37,7 @@ export default function AdminPanel() {
 
   // Установка начальной страницы в зависимости от роли
   const getInitialPage = () => {
-    if (user.role === "manager") {
+    if (user.isManager) {
       return currentPage === "categories" ? "categories" : currentPage
     } else {
       return currentPage === "products" || currentPage === "cities" ? currentPage : "products"
@@ -44,20 +46,19 @@ export default function AdminPanel() {
 
   const renderPage = () => {
     const page = getInitialPage()
-
     switch (page) {
       case "categories":
-        return user.role === "manager" ? <CategoriesPage /> : null
+        return user.isManager ? <CategoriesPage /> : null
       case "subcategories":
-        return user.role === "manager" ? <SubcategoriesPage /> : null
+        return user.isManager ? <SubcategoriesPage /> : null
       case "products":
         return <ProductsPage user={user} />
       case "couriers":
-        return user.role === "manager" ? <CouriersPage /> : null
+        return user.isManager ? <CouriersPage /> : null
       case "cities":
-        return user.role === "courier" ? <CitiesPage user={user} /> : null
+        return !user.isManager ? <CitiesPage user={user} /> : null
       default:
-        return user.role === "manager" ? <CategoriesPage /> : <ProductsPage user={user} />
+        return user.isManager ? <CategoriesPage /> : <ProductsPage user={user} />
     }
   }
 

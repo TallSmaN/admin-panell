@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { User } from "@/types"
+import type {APIUser, User} from "@/types"
 import { dataService } from "@/services/data-service"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "@/hooks/use-toast"
 
 interface CitiesPageProps {
-  user: User
+  user: APIUser
 }
 
 export function CitiesPage({ user }: CitiesPageProps) {

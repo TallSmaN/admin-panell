@@ -19,40 +19,74 @@ class DataService {
     {
       id: "1",
       name: "iPhone 15",
-      subcategoryId: "1",
-      subcategoryName: "Smartphones",
       price: 800,
-      totalQuantity: 15,
-      courierQuantities: { "2": 5, "3": 10 },
       imageUrl: "/placeholder.svg?height=200&width=200",
+      stock: {
+        total: 15,
+        perCourier: [
+          { id: "2", username: "CourierA", quantity: 5 },
+          { id: "3", username: "CourierB", quantity: 10 },
+        ],
+      },
+      category: {
+        id: "1",
+        name: "Smartphones",
+        subcategory: { id: "1", name: "Smartphones" },
+      },
     },
     {
       id: "2",
       name: "Samsung Galaxy S24",
-      subcategoryId: "1",
-      subcategoryName: "Smartphones",
       price: 700,
-      totalQuantity: 13,
-      courierQuantities: { "2": 3, "3": 10 },
+      imageUrl: "/placeholder.svg?height=200&width=200",
+      stock: {
+        total: 13,
+        perCourier: [
+          { id: "2", username: "CourierA", quantity: 3 },
+          { id: "3", username: "CourierB", quantity: 10 },
+        ],
+      },
+      category: {
+        id: "1",
+        name: "Smartphones",
+        subcategory: { id: "1", name: "Smartphones" },
+      },
     },
     {
       id: "3",
       name: "MacBook Pro",
-      subcategoryId: "2",
-      subcategoryName: "Laptops",
       price: 1500,
-      totalQuantity: 7,
-      courierQuantities: { "2": 2, "3": 5 },
       imageUrl: "/placeholder.svg?height=200&width=200",
+      stock: {
+        total: 7,
+        perCourier: [
+          { id: "2", username: "CourierA", quantity: 2 },
+          { id: "3", username: "CourierB", quantity: 5 },
+        ],
+      },
+      category: {
+        id: "2",
+        name: "Laptops",
+        subcategory: { id: "2", name: "Laptops" },
+      },
     },
     {
       id: "4",
       name: "Basic T-Shirt",
-      subcategoryId: "3",
-      subcategoryName: "T-Shirts",
       price: 25,
-      totalQuantity: 20,
-      courierQuantities: { "2": 8, "3": 12 },
+      imageUrl: "/placeholder.svg?height=200&width=200",
+      stock: {
+        total: 20,
+        perCourier: [
+          { id: "2", username: "CourierA", quantity: 8 },
+          { id: "3", username: "CourierB", quantity: 12 },
+        ],
+      },
+      category: {
+        id: "3",
+        name: "T-Shirts",
+        subcategory: { id: "3", name: "T-Shirts" },
+      },
     },
   ]
 
@@ -71,169 +105,91 @@ class DataService {
 
   // Categories
   async getCategories(): Promise<Category[]> {
-    if (this.USE_API) {
-      const response = await apiClient.get<Category[]>(API_CONFIG.ENDPOINTS.CATEGORIES.LIST)
-      return response.success ? response.data! : []
-    }
-    return [...this.categories]
+    const response = await apiClient.get<Category[]>(API_CONFIG.ENDPOINTS.CATEGORIES.LIST)
+    return response.success ? response.data! : []
   }
 
   async createCategory(name: string): Promise<Category | null> {
-    if (this.USE_API) {
-      const response = await apiClient.post<Category>(API_CONFIG.ENDPOINTS.CATEGORIES.CREATE, { name })
-      return response.success ? response.data! : null
-    }
-
-    const category: Category = {
-      id: Date.now().toString(),
-      name,
-      subcategoriesCount: 0,
-    }
-    this.categories.push(category)
-    return category
+    const response = await apiClient.post<Category>(API_CONFIG.ENDPOINTS.CATEGORIES.CREATE, { name })
+    return response.success ? response.data! : null
   }
 
   async updateCategory(id: string, name: string): Promise<Category | null> {
-    if (this.USE_API) {
-      const response = await apiClient.put<Category>(API_CONFIG.ENDPOINTS.CATEGORIES.UPDATE(id), { name })
-      return response.success ? response.data! : null
-    }
 
-    const index = this.categories.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      this.categories[index] = { ...this.categories[index], name }
-      return this.categories[index]
-    }
-    return null
+    const response = await apiClient.put<Category>(API_CONFIG.ENDPOINTS.CATEGORIES.UPDATE(id), { name })
+    return response.success ? response.data! : null
+
   }
 
   async deleteCategory(id: string): Promise<boolean> {
-    if (this.USE_API) {
-      const response = await apiClient.delete(API_CONFIG.ENDPOINTS.CATEGORIES.DELETE(id))
-      return response.success
-    }
 
-    const index = this.categories.findIndex((c) => c.id === id)
-    if (index !== -1) {
-      this.categories.splice(index, 1)
+    const response = await apiClient.delete(API_CONFIG.ENDPOINTS.CATEGORIES.DELETE(id))
+    return response.success
 
-      // Каскадное удаление подкатегорий
-      const subcategoriesToDelete = this.subcategories.filter((s) => s.categoryId === id)
-      this.subcategories = this.subcategories.filter((s) => s.categoryId !== id)
 
-      // Каскадное удаление товаров из удаленных подкатегорий
-      const subcategoryIds = subcategoriesToDelete.map((s) => s.id)
-      this.products = this.products.filter((p) => !subcategoryIds.includes(p.subcategoryId))
-
-      return true
-    }
-    return false
   }
 
   // Subcategories
   async getSubcategories(): Promise<Subcategory[]> {
-    if (this.USE_API) {
-      const response = await apiClient.get<Subcategory[]>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.LIST)
-      return response.success ? response.data! : []
-    }
 
-    return this.subcategories.map((sub) => ({
-      ...sub,
-      productsCount: this.products.filter((p) => p.subcategoryId === sub.id).length,
-    }))
+    const response = await apiClient.get<Subcategory[]>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.LIST)
+    return response.success ? response.data! : []
+
+
   }
 
   async createSubcategory(name: string, categoryId: string): Promise<Subcategory | null> {
-    if (this.USE_API) {
-      const response = await apiClient.post<Subcategory>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.CREATE, {
-        name,
-        categoryId,
-      })
-      return response.success ? response.data! : null
-    }
 
-    const category = this.categories.find((c) => c.id === categoryId)
-    if (!category) return null
-
-    const subcategory: Subcategory = {
-      id: Date.now().toString(),
+    const response = await apiClient.post<Subcategory>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.CREATE, {
       name,
       categoryId,
-      categoryName: category.name,
-      productsCount: 0,
-    }
-    this.subcategories.push(subcategory)
-    category.subcategoriesCount++
-    return subcategory
+    })
+    return response.success ? response.data! : null
+
+
   }
 
   async updateSubcategory(id: string, name: string, categoryId: string): Promise<Subcategory | null> {
-    if (this.USE_API) {
-      const response = await apiClient.put<Subcategory>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.UPDATE(id), {
-        name,
-        categoryId,
-      })
-      return response.success ? response.data! : null
-    }
 
-    const index = this.subcategories.findIndex((s) => s.id === id)
-    const category = this.categories.find((c) => c.id === categoryId)
-
-    if (index !== -1 && category) {
-      this.subcategories[index] = {
-        ...this.subcategories[index],
-        name,
-        categoryId,
-        categoryName: category.name,
-      }
-      return this.subcategories[index]
-    }
-    return null
+    const response = await apiClient.put<Subcategory>(API_CONFIG.ENDPOINTS.SUBCATEGORIES.UPDATE(id), {
+      name,
+      categoryId,
+    })
+    return response.success ? response.data! : null
   }
 
   async deleteSubcategory(id: string): Promise<boolean> {
-    if (this.USE_API) {
-      const response = await apiClient.delete(API_CONFIG.ENDPOINTS.SUBCATEGORIES.DELETE(id))
-      return response.success
-    }
 
-    const index = this.subcategories.findIndex((s) => s.id === id)
-    if (index !== -1) {
-      const subcategory = this.subcategories[index]
-      this.subcategories.splice(index, 1)
-
-      // Обновляем счетчик подкатегорий в категории
-      const category = this.categories.find((c) => c.id === subcategory.categoryId)
-      if (category) {
-        category.subcategoriesCount--
-      }
-
-      // Каскадное удаление товаров из этой подкатегории
-      this.products = this.products.filter((p) => p.subcategoryId !== id)
-      return true
-    }
-    return false
+    const response = await apiClient.delete(API_CONFIG.ENDPOINTS.SUBCATEGORIES.DELETE(id))
+    return response.success
   }
 
   // Products
   async getProducts(): Promise<Product[]> {
-    if (this.USE_API) {
-      const response = await apiClient.get<Product[]>(API_CONFIG.ENDPOINTS.PRODUCTS.LIST)
-      return response.success ? response.data! : []
-    }
-    return [...this.products]
+    const response = await apiClient.get<Product[]>(API_CONFIG.ENDPOINTS.PRODUCTS.LIST)
+    return response.success ? response.data! : []
+
   }
 
   async getProductsForCourier(courierId: string): Promise<Product[]> {
     if (this.USE_API) {
-      const response = await apiClient.get<Product[]>(API_CONFIG.ENDPOINTS.PRODUCTS.LIST_FOR_COURIER(courierId))
-      return response.success ? response.data! : []
+      const resp = await apiClient.get<Product[]>(
+          API_CONFIG.ENDPOINTS.PRODUCTS.LIST_FOR_COURIER(courierId)
+      );
+      return resp.success ? resp.data! : [];
     }
 
-    return this.products.map((product) => ({
-      ...product,
-      totalQuantity: product.courierQuantities[courierId] || 0,
-    }))
+    return this.products.map(product => {
+      const entry = product.stock.perCourier.find(e => e.id === courierId);
+
+      return {
+        ...product,
+        stock: {
+          total: entry?.quantity ?? 0,
+          perCourier: entry ? [entry] : [],
+        },
+      };
+    });
   }
 
   async createProduct(name: string, subcategoryId: string, price: number, imageUrl?: string): Promise<Product | null> {
@@ -317,17 +273,8 @@ class DataService {
   }
 
   async deleteProduct(id: string): Promise<boolean> {
-    if (this.USE_API) {
-      const response = await apiClient.delete(API_CONFIG.ENDPOINTS.PRODUCTS.DELETE(id))
-      return response.success
-    }
-
-    const index = this.products.findIndex((p) => p.id === id)
-    if (index !== -1) {
-      this.products.splice(index, 1)
-      return true
-    }
-    return false
+    const response = await apiClient.delete(API_CONFIG.ENDPOINTS.PRODUCTS.DELETE(id))
+    return response.success
   }
 
   // Couriers

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { User } from "@/types"
+import type {APIUser, User} from "@/types"
 import { authService } from "@/services/auth-service"
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<APIUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -13,6 +13,7 @@ export function useAuth() {
     setUser(currentUser)
     setIsLoading(false)
   }, [])
+
 
   const login = async (username: string, password: string): Promise<boolean> => {
     const user = await authService.login(username, password)

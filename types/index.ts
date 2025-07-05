@@ -6,6 +6,12 @@ export interface User {
   cities?: string[]
 }
 
+export interface APIUser {
+  id: string
+  username: string
+  isManager: boolean
+}
+
 export interface Category {
   id: string
   name: string
@@ -20,16 +26,38 @@ export interface Subcategory {
   productsCount: number
 }
 
-export interface Product {
-  id: string
-  name: string
-  subcategoryId: string
-  subcategoryName: string
-  price: number
-  totalQuantity: number
-  courierQuantities: Record<string, number>
-  imageUrl?: string // Добавляем поле для фотографии
+// Дополняем отсутствующий SubcategoryDTO
+export interface SubcategoryDTO {
+  id: string;
+  name: string;
 }
+
+export interface CourierStockDTO {
+  id: string;
+  username: string;
+  quantity: number;
+}
+
+export interface StockSummaryDTO {
+  total: number;
+  perCourier: CourierStockDTO[];
+}
+
+export interface ProductCategoryDTO {
+  id: string;
+  name: string;
+  subcategory: SubcategoryDTO;
+}
+
+export interface Product{
+  id: string;
+  name: string;
+  price: number;
+  imageUrl?: string;
+  stock: StockSummaryDTO;
+  category: ProductCategoryDTO;
+}
+
 
 export interface Courier {
   id: string

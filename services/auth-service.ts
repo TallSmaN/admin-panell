@@ -1,6 +1,14 @@
-import type { User } from "@/types"
+import {APIUser, User} from "@/types"
 import { apiClient } from "./api-client"
 import { API_CONFIG } from "@/config/api-endpoints"
+import { jwtDecode } from "jwt-decode"
+
+interface JwtClaims {
+  username: string
+  user_id: string
+  isManager: boolean
+  exp: number
+}
 
 class AuthService {
   // Флаг для переключения между моком и API
@@ -23,27 +31,26 @@ class AuthService {
     },
   ]
 
-  async login(login: string, password: string): Promise<User | null> {
-    if (this.USE_API) {
-      const response = await apiClient.post<{ user: User; token: string }>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-        login,
-        password,
-      })
+  async login(username: string, password: string): Promise<APIUser | null> {
+    const response = await apiClient.post<{ token: string }>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {username, password})
 
-      if (response.success && response.data) {
-        localStorage.setItem("authToken", response.data.token)
-        localStorage.setItem("currentUser", JSON.stringify(response.data.user))
-        return response.data.user
+    if (response.success && response.data) {
+      let claims: JwtClaims
+
+
+      claims = jwtDecode<JwtClaims>(response.data.token)
+
+
+      localStorage.setItem("authToken", response.data.token)
+      localStorage.setItem("currentUser", JSON.stringify(claims))
+
+      return {
+        username: claims.username,
+        id: claims.user_id,
+        isManager: claims.isManager
       }
-      return null
     }
 
-    // Мок для разработки
-    const user = this.users.find((u) => u.login === login && u.password === password)
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user))
-      return user
-    }
     return null
   }
 
@@ -56,8 +63,10 @@ class AuthService {
     localStorage.removeItem("authToken")
   }
 
-  getCurrentUser(): User | null {
+  getCurrentUser(): APIUser | null {
     const userData = localStorage.getItem("currentUser")
+
+
     return userData ? JSON.parse(userData) : null
   }
 

@@ -2,38 +2,38 @@
 // Фронтендеру нужно только изменить BASE_URL и при необходимости пути к эндпоинтам
 
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:2331/api",
   ENDPOINTS: {
     // Аутентификация
     AUTH: {
-      LOGIN: "/auth/login",
+      LOGIN: "/login",
       LOGOUT: "/auth/logout",
       ME: "/auth/me",
     },
 
     // Категории
     CATEGORIES: {
-      LIST: "/categories",
-      CREATE: "/categories",
-      UPDATE: (id: string) => `/categories/${id}`,
-      DELETE: (id: string) => `/categories/${id}`,
+      LIST: "/admin/categories",
+      CREATE: "/admin/category",
+      UPDATE: (id: string) => `/admin/category/${id}`,
+      DELETE: (id: string) => `/admin/category/${id}`,
     },
 
     // Подкатегории
     SUBCATEGORIES: {
-      LIST: "/subcategories",
-      CREATE: "/subcategories",
-      UPDATE: (id: string) => `/subcategories/${id}`,
-      DELETE: (id: string) => `/subcategories/${id}`,
+      LIST: "/admin/subcategories",
+      CREATE: "/admin/subcategory",
+      UPDATE: (id: string) => `/admin/subcategory/${id}`,
+      DELETE: (id: string) => `/admin/subcategory/${id}`,
     },
 
     // Товары
     PRODUCTS: {
-      LIST: "/products",
+      LIST: "/admin/products",
       LIST_FOR_COURIER: (courierId: string) => `/products/courier/${courierId}`,
-      CREATE: "/products",
-      UPDATE: (id: string) => `/products/${id}`,
-      DELETE: (id: string) => `/products/${id}`,
+      CREATE: "/admin/product",
+      UPDATE: (id: string) => `/admin/product/${id}`,
+      DELETE: (id: string) => `/admin/product/${id}`,
       UPDATE_COURIER_QUANTITY: (productId: string, courierId: string) =>
         `/products/${productId}/courier/${courierId}/quantity`,
     },
@@ -49,6 +49,7 @@ export const API_CONFIG = {
 
     // Изображения
     IMAGES: {
+      FETCH: (id: string) => `/images/${id}`,
       UPLOAD: "/images/upload",
       DELETE: "/images/delete",
     },

@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import type { Product, User } from "@/types"
+import type {APIUser, Product, User} from "@/types"
 import { dataService } from "@/services/data-service"
 import { useSort } from "@/hooks/use-sort"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ import { Search, Package, Minus, Plus, Check } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 interface ProductsPageCourierProps {
-  user: User
+  user: APIUser
 }
 
 export function ProductsPageCourier({ user }: ProductsPageCourierProps) {

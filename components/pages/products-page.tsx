@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import type { Product, Subcategory, User } from "@/types"
+import type {APIUser, Product, Subcategory, User} from "@/types"
 import { dataService } from "@/services/data-service"
 import { useSort } from "@/hooks/use-sort"
 import { DataTable } from "@/components/ui/data-table"
@@ -18,7 +18,7 @@ import { Plus, Edit, Trash2, Users, ImageIcon } from "lucide-react"
 import { ProductsPageCourier } from "./products-page-courier"
 
 interface ProductsPageProps {
-  user: User
+  user: APIUser
 }
 
 export function ProductsPage({ user }: ProductsPageProps) {
@@ -43,7 +43,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
 
   const loadData = async () => {
     try {
-      if (user.role === "manager") {
+      if (user.isManager) {
         const [productsData, couriersData] = await Promise.all([dataService.getProducts(), dataService.getCouriers()])
         setProducts(Array.isArray(productsData) ? productsData : [])
         setCouriers(Array.isArray(couriersData) ? couriersData : [])
@@ -64,10 +64,10 @@ export function ProductsPage({ user }: ProductsPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (user.role === "courier" && editingProduct) {
+    if (!user.isManager && editingProduct) {
       // Курьер может только обновлять количество
       await dataService.updateCourierProductQuantity(editingProduct.id, user.id, formData.quantity)
-    } else if (user.role === "manager") {
+    } else if (user.isManager) {
       if (!formData.name.trim() || !formData.subcategoryId) return
 
       if (editingProduct) {
@@ -94,7 +94,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
-    if (user.role === "courier") {
+    if (!user.isManager) {
       setFormData({
         name: product.name,
         subcategoryId: product.subcategoryId,
@@ -133,7 +133,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
   }
 
   const renderCourierQuantities = (quantities: Record<string, number>) => {
-    const entries = Object.entries(quantities).filter(([_, qty]) => qty > 0)
+    const entries = Object.entries(quantities ?? {}).filter(([_, qty]) => qty > 0)
 
     if (entries.length === 0) {
       return <span className="text-muted-foreground">Не распределено</span>
@@ -193,13 +193,15 @@ export function ProductsPage({ user }: ProductsPageProps) {
         sortable: true,
       },
       {
-        key: "subcategoryName" as keyof Product,
+        key: "subcategoryName" as keyof Product, // не гетает сабкатегори нейм
         label: "Подкатегория",
         sortable: true,
+        render: (_: any, product: Product) =>
+            product.category?.subcategory?.name ?? "—",
       },
     ]
 
-    if (user.role === "manager") {
+    if (user.isManager) {
       return [
         ...baseColumns,
         {
@@ -212,11 +214,19 @@ export function ProductsPage({ user }: ProductsPageProps) {
           key: "totalQuantity" as keyof Product,
           label: "Общее количество",
           sortable: true,
+          render: (_: any, product: Product) =>
+              product.stock.total ?? "—",
         },
         {
           key: "courierQuantities" as keyof Product,
           label: "По курьерам",
-          render: renderCourierQuantities,
+          render: (_: any, product: Product) =>
+              // конвертируем массив в Record<string, number> и передаём в ваш рендерер
+              renderCourierQuantities(
+                  Object.fromEntries(
+                      product.stock.perCourier.map(c => [c.username, c.quantity])
+                  )
+              ),
         },
       ]
     } else {
@@ -232,7 +242,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
   }
 
   const getActions = () => {
-    if (user.role === "courier") {
+    if (!user.isManager) {
       return (product: Product) => (
         <Button variant="ghost" size="icon" onClick={() => handleEdit(product)}>
           <Edit className="h-4 w-4" />
@@ -257,7 +267,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
     )
   }
 
-  if (user.role === "courier") {
+  if (!user.isManager) {
     return <ProductsPageCourier user={user} />
   }
 
@@ -265,7 +275,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Товары</h1>
-        {user.role === "manager" && (
+        {user.isManager && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingProduct(null)}>
@@ -290,7 +300,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    disabled={user.role === "courier"}
+                    disabled={!user.isManager}
                   />
                 </div>
                 <div className="space-y-2">
@@ -299,7 +309,7 @@ export function ProductsPage({ user }: ProductsPageProps) {
                     value={formData.subcategoryId}
                     onValueChange={(value) => setFormData({ ...formData, subcategoryId: value })}
                     required
-                    disabled={user.role === "courier"}
+                    disabled={!user.isManager}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите подкатегорию" />
@@ -321,10 +331,10 @@ export function ProductsPage({ user }: ProductsPageProps) {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                     required
-                    disabled={user.role === "courier"}
+                    disabled={!user.isManager}
                   />
                 </div>
-                {user.role === "courier" && (
+                {!user.isManager && (
                   <div className="space-y-2">
                     <Label htmlFor="quantity">Количество</Label>
                     <Input

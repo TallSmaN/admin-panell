@@ -8,6 +8,7 @@ export interface ApiResponse<T = any> {
   data?: T
   error?: string
   message?: string
+  code?: number
 }
 
 class ApiClient {
@@ -26,7 +27,7 @@ class ApiClient {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || data.error || `HTTP ${response.status}`,
+          code: response.status
         }
       }
 

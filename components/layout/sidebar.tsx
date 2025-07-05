@@ -1,12 +1,12 @@
 "use client"
 
-import type { User } from "@/types"
+import type {APIUser, User} from "@/types"
 import { Button } from "@/components/ui/button"
 import { Package, Tags, ShoppingCart, Users, MapPin, LogOut, Menu } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 interface SidebarProps {
-  user: User
+  user: APIUser
   currentPage: string
   onPageChange: (page: string) => void
   onLogout: () => void
@@ -25,14 +25,16 @@ export function Sidebar({ user, currentPage, onPageChange, onLogout }: SidebarPr
     { key: "cities", label: "Города", icon: MapPin },
   ]
 
-  const menuItems = user.role === "manager" ? managerMenuItems : courierMenuItems
+
+  const menuItems = user.isManager ? managerMenuItems : courierMenuItems
+
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b">
         <h2 className="text-lg font-semibold">Админ-панель</h2>
         <p className="text-sm text-muted-foreground">
-          {user.login} ({user.role === "manager" ? "Менеджер" : "Курьер"})
+          {user.username} ({user.isManager ? "Менеджер" : "Курьер"})
         </p>
       </div>
 
