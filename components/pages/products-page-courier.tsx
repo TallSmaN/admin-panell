@@ -45,7 +45,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
   const filteredProducts = safeData.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.subcategoryName.toLowerCase().includes(searchTerm.toLowerCase()),
+      product.category.subcategory.name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
@@ -89,7 +89,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
     const currentProduct = products.find((p) => p.id === productId)
     if (!currentProduct) return
 
-    const currentQuantity = editingQuantities[productId] ?? currentProduct.totalQuantity
+    const currentQuantity = editingQuantities[productId] ?? currentProduct.stock.total
     const newQuantity = Math.max(0, currentQuantity + adjustment)
 
     setEditingQuantities((prev) => ({
@@ -103,7 +103,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
   }
 
   const getDisplayQuantity = (product: Product) => {
-    return editingQuantities[product.id] ?? product.totalQuantity
+    return editingQuantities[product.id] ?? product.stock.total
   }
 
   if (isLoading) {
@@ -139,7 +139,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
               <div className="flex justify-between items-start">
                 <CardTitle className="text-lg leading-tight">{product.name}</CardTitle>
                 <Badge variant="outline" className="ml-2 shrink-0">
-                  {product.subcategoryName}
+                  {product.category.subcategory.name}
                 </Badge>
               </div>
             </CardHeader>

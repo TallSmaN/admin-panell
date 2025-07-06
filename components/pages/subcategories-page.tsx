@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import type { Subcategory, Category } from "@/types"
+import type {Subcategory, Category, Product} from "@/types"
 import { dataService } from "@/services/data-service"
 import { useSort } from "@/hooks/use-sort"
 import { DataTable } from "@/components/ui/data-table"
@@ -96,11 +96,13 @@ export function SubcategoriesPage() {
       key: "categoryName" as keyof Subcategory,
       label: "Категория",
       sortable: true,
+      render: (_: any, subcategory: Subcategory) => subcategory.category.name ?? "—"
     },
     {
       key: "productsCount" as keyof Subcategory,
       label: "Количество товаров",
       sortable: true,
+      render: (_: any, subcategory: Subcategory) => subcategory.productCount ?? "—"
     },
   ]
 

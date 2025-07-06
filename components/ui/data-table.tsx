@@ -36,7 +36,6 @@ export function DataTable<T extends { id: string }>({ data, columns, sortConfig,
     )
   }
 
-  console.log(columns)
   return (
     <div className="rounded-md border">
       <Table>

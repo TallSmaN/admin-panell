@@ -1,67 +1,63 @@
-// Конфигурация API эндпоинтов
-// Фронтендеру нужно только изменить BASE_URL и при необходимости пути к эндпоинтам
-
-export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:2331/api",
-  ENDPOINTS: {
-    // Аутентификация
-    AUTH: {
-      LOGIN: "/login",
-      LOGOUT: "/auth/logout",
-      ME: "/auth/me",
-    },
-
-    // Категории
-    CATEGORIES: {
-      LIST: "/admin/categories",
-      CREATE: "/admin/category",
-      UPDATE: (id: string) => `/admin/category/${id}`,
-      DELETE: (id: string) => `/admin/category/${id}`,
-    },
-
-    // Подкатегории
-    SUBCATEGORIES: {
-      LIST: "/admin/subcategories",
-      CREATE: "/admin/subcategory",
-      UPDATE: (id: string) => `/admin/subcategory/${id}`,
-      DELETE: (id: string) => `/admin/subcategory/${id}`,
-    },
-
-    // Товары
-    PRODUCTS: {
-      LIST: "/admin/products",
-      LIST_FOR_COURIER: (courierId: string) => `/products/courier/${courierId}`,
-      CREATE: "/admin/product",
-      UPDATE: (id: string) => `/admin/product/${id}`,
-      DELETE: (id: string) => `/admin/product/${id}`,
-      UPDATE_COURIER_QUANTITY: (productId: string, courierId: string) =>
-        `/products/${productId}/courier/${courierId}/quantity`,
-    },
-
-    // Курьеры
-    COURIERS: {
-      LIST: "/couriers",
-      CREATE: "/couriers",
-      UPDATE: (id: string) => `/couriers/${id}`,
-      DELETE: (id: string) => `/couriers/${id}`,
-      UPDATE_CITIES: (id: string) => `/couriers/${id}/cities`,
-    },
-
-    // Изображения
-    IMAGES: {
-      FETCH: (id: string) => `/images/${id}`,
-      UPLOAD: "/images/upload",
-      DELETE: "/images/delete",
-    },
-
-    // Справочники
-    REFERENCES: {
-      CITIES: "/references/cities",
-    },
-  },
+export const enum API_CDN {
+    AUTH = "http://localhost:2335/api",
+    ADMIN = "http://localhost:2331/api",
+    COURIER = "http://localhost:2333/api"
 }
 
-// Хелпер для построения полного URL
-export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`
+export const EndPoints = {
+    Auth: {
+        LOGIN: "/login",
+        LOGOUT: "/auth/logout",
+        ME: "/auth/me",
+    },
+
+    // admin
+    Categories: {
+        LIST: "/admin/categories",
+        CREATE: "/admin/category",
+        UPDATE: (id: string) => `/admin/category/${id}`,
+        DELETE: (id: string) => `/admin/category/${id}`
+    },
+
+    // admin
+    Subcategories: {
+        LIST: "/admin/subcategories",
+        CREATE: "/admin/subcategory",
+        UPDATE: (id: string) => `/admin/subcategory/${id}`,
+        DELETE: (id: string) => `/admin/subcategory/${id}`
+    },
+
+    // admin
+    Products: {
+        LIST: "/admin/products",
+        LIST_FOR_COURIER: (courierId: string) => `/products/courier/${courierId}`,
+        CREATE: "/admin/product",
+        UPDATE: (id: string) => `/admin/product/${id}`,
+        DELETE: (id: string) => `/admin/product/${id}`,
+        UPDATE_COURIER_QUANTITY: (courierId: string) =>
+            `/courier/stock/${courierId}`
+    },
+
+    Couriers: {
+        LIST: "/admin/couriers",
+        CREATE: "/admin/courier",
+        UPDATE: (id: string) => `/admin/courier/${id}`,
+        DELETE: (id: string) => `/admin/courier/${id}`,
+        FETCH_CITIES: (id: string) => `/courier/${id}/cities`,
+        UPDATE_CITIES: (id: string) => `/courier/${id}/cities`
+    },
+
+    Images: {
+        FETCH: (id: string) => `/images/${id}`,
+        UPLOAD: (id: string) => `/admin/images/${id}`,
+        DELETE: (id: string) => `/admin/images/${id}`
+    },
+
+    References: {
+        CITIES: "/references/cities"
+    }
+} as const
+
+export const buildApiUrl = (apiUrl: API_CDN, endpoint: string): string => {
+    return `${apiUrl}${endpoint}`
 }

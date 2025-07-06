@@ -1,7 +1,7 @@
 import {APIUser, User} from "@/types"
-import { apiClient } from "./api-client"
-import { API_CONFIG } from "@/config/api-endpoints"
-import { jwtDecode } from "jwt-decode"
+import {apiClient} from "./api-client"
+import {API_CDN, EndPoints} from "@/config/api-endpoints"
+import {jwtDecode} from "jwt-decode"
 
 interface JwtClaims {
   username: string
@@ -32,7 +32,7 @@ class AuthService {
   ]
 
   async login(username: string, password: string): Promise<APIUser | null> {
-    const response = await apiClient.post<{ token: string }>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {username, password})
+    const response = await apiClient.post<{ token: string }>(API_CDN.AUTH, EndPoints.Auth.LOGIN, {username, password})
 
     if (response.success && response.data) {
       let claims: JwtClaims
@@ -55,10 +55,6 @@ class AuthService {
   }
 
   async logout(): Promise<void> {
-    if (this.USE_API) {
-      await apiClient.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT)
-    }
-
     localStorage.removeItem("currentUser")
     localStorage.removeItem("authToken")
   }

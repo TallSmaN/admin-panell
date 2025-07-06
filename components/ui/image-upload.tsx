@@ -1,30 +1,34 @@
 "use client"
 
-import type React from "react"
+import React, {useEffect} from "react"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { imageService } from "@/services/image-service"
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import {API_CDN} from "@/config/api-endpoints";
 
 interface ImageUploadProps {
   currentImageUrl?: string
   onImageChange: (imageUrl: string | null) => void
-  disabled?: boolean
+  isDisabled?: boolean
+  productId: string
 }
 
-export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }: ImageUploadProps) {
+export function ImageUpload({ currentImageUrl, onImageChange, isDisabled = false, productId}: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    setPreviewUrl(currentImageUrl || null)
+  }, [currentImageUrl])
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) return
+    if (!file || !productId) return
 
-    // Валидация файла
     const validation = imageService.validateImage(file)
     if (!validation.valid) {
       toast({
@@ -38,8 +42,8 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
     setIsUploading(true)
 
     try {
-      const result = await imageService.uploadImage(file)
-
+      const result = await imageService.uploadImage(file, productId)
+      console.log(result)
       if (result.success && result.imageUrl) {
         setPreviewUrl(result.imageUrl)
         onImageChange(result.imageUrl)
@@ -62,7 +66,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
       })
     } finally {
       setIsUploading(false)
-      // Очищаем input для возможности повторной загрузки того же файла
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
@@ -72,7 +75,7 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
   const handleRemoveImage = async () => {
     if (previewUrl) {
       try {
-        await imageService.deleteImage(previewUrl)
+        await imageService.deleteImage(productId)
         setPreviewUrl(null)
         onImageChange(null)
         toast({
@@ -95,7 +98,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
 
   return (
     <div className="space-y-2">
-      <Label>Фотография товара</Label>
 
       <input
         ref={fileInputRef}
@@ -103,7 +105,7 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
-        disabled={disabled || isUploading}
+        disabled={isDisabled || isUploading}
       />
 
       {previewUrl ? (
@@ -126,7 +128,7 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
                 variant="outline"
                 size="icon"
                 onClick={handleRemoveImage}
-                disabled={disabled || isUploading}
+                disabled={isDisabled || isUploading}
                 className="text-red-500 hover:text-red-600 bg-transparent"
               >
                 <X className="h-4 w-4" />
@@ -141,7 +143,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
               <ImageIcon className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium">Добавить фотографию</p>
               <p className="text-xs text-muted-foreground">PNG, JPG, WebP до 5MB</p>
             </div>
             <Button
@@ -149,7 +150,7 @@ export function ImageUpload({ currentImageUrl, onImageChange, disabled = false }
               variant="outline"
               size="sm"
               onClick={triggerFileSelect}
-              disabled={disabled || isUploading}
+              disabled={isDisabled || isUploading}
             >
               {isUploading ? (
                 <>

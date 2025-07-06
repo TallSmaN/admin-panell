@@ -81,7 +81,7 @@ export function CouriersPage() {
   const handleEdit = (courier: Courier) => {
     setEditingCourier(courier)
     setFormData({
-      login: courier.login,
+      login: courier.username,
       password: "",
     })
     setIsDialogOpen(true)
@@ -110,7 +110,7 @@ export function CouriersPage() {
 
   const columns = [
     {
-      key: "login" as keyof Courier,
+      key: "username" as keyof Courier,
       label: "Логин",
       sortable: true,
     },
@@ -174,7 +174,7 @@ export function CouriersPage() {
                   id="login"
                   value={formData.login}
                   onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                  required
+                  disabled={!!editingCourier}
                 />
               </div>
 
