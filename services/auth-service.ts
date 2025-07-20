@@ -5,7 +5,7 @@ import {jwtDecode} from "jwt-decode"
 
 interface JwtClaims {
   username: string
-  user_id: string
+  id: string
   isManager: boolean
   exp: number
 }
@@ -46,7 +46,7 @@ class AuthService {
 
       return {
         username: claims.username,
-        id: claims.user_id,
+        id: claims.id,
         isManager: claims.isManager
       }
     }

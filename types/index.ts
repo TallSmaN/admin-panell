@@ -62,6 +62,15 @@ export interface Product {
     category: ProductCategoryDTO;
 }
 
+export interface CourierProduct {
+    id: string
+    name: string
+    quantity: number
+    subcategory: {
+        id: string
+        name: string
+    }
+}
 
 export interface Courier {
     id: string

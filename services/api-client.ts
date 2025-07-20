@@ -40,7 +40,6 @@ class ApiClient {
                 message: data.message,
             }
         } catch (error) {
-            console.log(error)
             return {
                 success: false,
                 error: "Ошибка обработки ответа сервера",

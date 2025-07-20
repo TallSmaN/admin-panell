@@ -43,7 +43,6 @@ export function ImageUpload({ currentImageUrl, onImageChange, isDisabled = false
 
     try {
       const result = await imageService.uploadImage(file, productId)
-      console.log(result)
       if (result.success && result.imageUrl) {
         setPreviewUrl(result.imageUrl)
         onImageChange(result.imageUrl)
@@ -95,6 +94,8 @@ export function ImageUpload({ currentImageUrl, onImageChange, isDisabled = false
   const triggerFileSelect = () => {
     fileInputRef.current?.click()
   }
+
+  console.log(previewUrl)
 
   return (
     <div className="space-y-2">

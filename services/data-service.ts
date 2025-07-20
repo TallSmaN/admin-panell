@@ -1,4 +1,4 @@
-import type {Category, Courier, Product, Subcategory} from "@/types"
+import type {Category, Courier, CourierProduct, Product, Subcategory} from "@/types"
 import {apiClient} from "./api-client"
 import {API_CDN, EndPoints} from "@/config/api-endpoints"
 
@@ -170,25 +170,12 @@ class DataService {
 
     }
 
-    async getProductsForCourier(courierId: string): Promise<Product[]> {
-        if (this.USE_API) {
-            const resp = await apiClient.get<Product[]>(
-                API_CDN.ADMIN, EndPoints.Products.LIST_FOR_COURIER(courierId)
-            );
-            return resp.success ? resp.data! : [];
-        }
-
-        return this.products.map(product => {
-            const entry = product.stock.perCourier.find(e => e.id === courierId);
-
-            return {
-                ...product,
-                stock: {
-                    total: entry?.quantity ?? 0,
-                    perCourier: entry ? [entry] : [],
-                },
-            };
-        });
+    async getProductsForCourier(courierId: string): Promise<CourierProduct[]> {
+        const resp = await apiClient.get<{ products: CourierProduct[] }>(
+            API_CDN.COURIER,
+            EndPoints.Products.LIST_FOR_COURIER(courierId),
+        )
+        return resp.success ? resp.data!.products : []
     }
 
     async createProduct(name: string, subcategoryId: string, price: number, imageUrl?: string): Promise<Product | null> {
@@ -237,30 +224,10 @@ class DataService {
     }
 
     async updateCourierProductQuantity(productId: string, courierId: string, quantity: number): Promise<boolean> {
-        if (this.USE_API) {
-            const response = await apiClient.put(
-                API_CDN.COURIER, EndPoints.Products.UPDATE_COURIER_QUANTITY(courierId), {productId, quantity})
-            return response.success
-        }
+        const response = await apiClient.put(
+            API_CDN.COURIER, EndPoints.Products.UPDATE_COURIER_QUANTITY(courierId), {productId, quantity})
+        return response.success
 
-        const product = this.products.find((p) => p.id === productId)
-        if (product) {
-            const existing = product.stock.perCourier.find(c => c.id === courierId);
-            if (existing) {
-                existing.quantity = quantity;
-            } else {
-                product.stock.perCourier.push({
-                    id: courierId,
-                    username:
-                    quantity,
-                });
-            }
-            product.stock.total = product.stock.perCourier
-                .reduce((sum, c) => sum + c.quantity, 0);
-
-            return true;
-        }
-        return false
     }
 
     async deleteProduct(id: string): Promise<boolean> {
@@ -319,36 +286,351 @@ class DataService {
 
     // Cities
     async getAvailableCities(): Promise<string[]> {
-        if (this.USE_API) {
-            const response = await apiClient.get<string[]>(API_CDN.COURIER, EndPoints.References.CITIES)
-            return response.success ? response.data! : []
-        }
+        // if (this.USE_API) {
+        //     const response = await apiClient.get<string[]>(API_CDN.COURIER, EndPoints.References.CITIES)
+        //     return response.success ? response.data! : []
+        // }
 
-        return ["Bocholt", "Köln", "Herne", "Lünen", "Dortmund", "Moers", "Bonn", "Bad Honnef", "Rheinbach", "Kaarst"]
+        return [
+            "Bocholt",
+            "Köln",
+            "Herne",
+            "Lünen",
+            "Dortmund",
+            "Moers",
+            "Bonn",
+            "Bad Honnef",
+            "Rheinbach",
+            "Kaarst",
+            "Königswinter",
+            "Werne",
+            "Essen",
+            "Erkelenz",
+            "Wegberg",
+            "Bad Salzuflen",
+            "Lemgo",
+            "Detmold",
+            "Ratingen",
+            "Linnich",
+            "Wassenberg",
+            "Jülich",
+            "Hückelhoven",
+            "Siegen",
+            "Hohenhausen",
+            "Lüdinghausen",
+            "Neuss",
+            "Monheim am Rhein",
+            "Bergisch Gladbach",
+            "Wesseling",
+            "Euskirchen",
+            "Lippstadt",
+            "Uedem",
+            "Selm",
+            "Recklinghausen",
+            "Vlotho",
+            "Dörentrup",
+            "Bösingfeld",
+            "Höxter",
+            "Löhne",
+            "Langenfeld",
+            "Datteln",
+            "Oer-Erkenschwick",
+            "Barntrup",
+            "Salzkotten",
+            "Geseke",
+            "Erwitte",
+            "Geldern",
+            "Goch",
+            "Borgentreich",
+            "Bünde",
+            "Kirchlengern",
+            "Bad Oeynhausen",
+            "Rheine",
+            "Emsdetten",
+            "Ahaus",
+            "Stadtlohn",
+            "Gescher",
+            "Würselen",
+            "Delbrück",
+            "Drensteinfurt",
+            "Sendenhorst",
+            "Porta Westfalica",
+            "Dormagen",
+            "Hilden",
+            "Leichlingen",
+            "Sankt Augustin",
+            "Siegburg",
+            "Emmerich am Rhein",
+            "Meerbusch",
+            "Dinslaken",
+            "Troisdorf",
+            "Raesfeld",
+            "Rees",
+            "Kreuzau",
+            "Xanten",
+            "Radevormwald",
+            "Rösrath",
+            "Eitorf",
+            "Waldbröl",
+            "Ennepetal",
+            "Havixbeck",
+            "Sprockhövel",
+            "Bad Driburg",
+            "Oerlinghausen",
+            "Beverungen",
+            "Rheda-Wiedenbrück",
+            "Sindorf",
+            "Halver",
+            "Lüdenscheid",
+            "Viersen",
+            "Süchteln",
+            "Kevelaer",
+            "Mechernich",
+            "Wülfrath",
+            "Erkrath",
+            "Neukirchen-Vluyn",
+            "Kamp-Lintfort",
+            "Gummersbach",
+            "Lohmar",
+            "Nümbrecht",
+            "Wiehl",
+            "Geilenkirchen",
+            "Wermelskirchen",
+            "Preußisch Oldendorf",
+            "Bestwig",
+            "Odenthal",
+            "Hückeswagen",
+            "Korschenbroich",
+            "Attendorn",
+            "Plettenberg",
+            "Jüchen",
+            "Grevenbroich",
+            "Netphen",
+            "Ibbenbüren",
+            "Lennestadt",
+            "Ochtrup",
+            "Baesweiler",
+            "Übach-Palenberg",
+            "Holzwickede",
+            "Waldniel",
+            "Wesel",
+            "Schwerte",
+            "Monschau",
+            "Spenge",
+            "Hiddenhausen",
+            "Lotte",
+            "Warstein",
+            "Brilon",
+            "Espelkamp",
+            "Nieheim",
+            "Telgte",
+            "Schmallenberg",
+            "Harsewinkel",
+            "Lindlar",
+            "Castrop-Rauxel",
+            "Heiligenhaus",
+            "Warendorf",
+            "Lage",
+            "Bottrop",
+            "Rahden",
+            "Overath",
+            "Steinhagen",
+            "Petershagen",
+            "Senden",
+            "Rietberg",
+            "Hürth",
+            "Hattingen",
+            "Marienheide",
+            "Bielefeld",
+            "Hövelhof",
+            "Aachen",
+            "Hamminkeln",
+            "Altena",
+            "Bergneustadt",
+            "Minden",
+            "Blomberg",
+            "Wetter (Ruhr)",
+            "Borken",
+            "Beckum",
+            "Krefeld",
+            "Borgholzhausen",
+            "Olpe",
+            "Freudenberg",
+            "Grefrath",
+            "Bergkamen",
+            "Herford",
+            "Gelsenkirchen",
+            "Marl",
+            "Greven",
+            "Duisburg",
+            "Sundern",
+            "Kierspe",
+            "Medebach",
+            "Unna",
+            "Enger",
+            "Bedburg",
+            "Morsbach",
+            "Kalkar",
+            "Marsberg",
+            "Mönchengladbach",
+            "Remscheid",
+            "Rödinghausen",
+            "Werther (Westf.)",
+            "Wickede (Ruhr)",
+            "Eschweiler",
+            "Hemer",
+            "Ahlen",
+            "Solingen",
+            "Rhede",
+            "Brühl",
+            "Waltrop",
+            "Hörstel",
+            "Kürten",
+            "Kreuztal",
+            "Herten",
+            "Lengerich",
+            "Büren",
+            "Schwelm",
+            "Ennigerloh",
+            "Finnentrop",
+            "Kamen",
+            "Kranenburg",
+            "Neuenrade",
+            "Elsdorf",
+            "Steinfurt",
+            "Schieder-Schwalenberg",
+            "Bad Berleburg",
+            "Wuppertal",
+            "Schloß Holte-Stukenbrock",
+            "Bornheim",
+            "Arnsberg",
+            "Steinheim",
+            "Niederkassel",
+            "Werl",
+            "Soest",
+            "Heinsberg",
+            "Tecklenburg",
+            "Schalksmühle",
+            "Straelen",
+            "Kleve",
+            "Ascheberg",
+            "Bochum",
+            "Burscheid",
+            "Herdecke",
+            "Bad Lippspringe",
+            "Haan",
+            "Halle (Westf.)",
+            "Rheurdt",
+            "Kerpen",
+            "Bönen",
+            "Iserlohn",
+            "Werdohl",
+            "Bad Laasphe",
+            "Hagen",
+            "Versmold",
+            "Paderborn",
+            "Oelde",
+            "Schermbeck",
+            "Hilchenbach",
+            "Fröndenberg/Ruhr",
+            "Winterberg",
+            "Willebadessen",
+            "Bad Wünnenberg",
+            "Wenden",
+            "Alsdorf",
+            "Meckenheim",
+            "Drolshagen",
+            "Mettmann",
+            "Stolberg",
+            "Düsseldorf",
+            "Brüggen",
+            "Frechen",
+            "Windeck",
+            "Warburg",
+            "Breckerfeld",
+            "Verl",
+            "Engelskirchen",
+            "Witten",
+            "Hüsten",
+            "Wipperfürth",
+            "Beyenburg",
+            "Münster",
+            "Liblar",
+            "Gütersloh",
+            "Düren",
+            "Voerde",
+            "Lechenich",
+            "Vreden",
+            "St. Tönis",
+            "Horn",
+            "Kirchhellen",
+            "Neheim",
+            "Zülpich",
+            "Willich",
+            "Schleiden",
+            "Niederkrüchten",
+            "Bad Münstereifel",
+            "Meinerzhagen",
+            "Kall",
+            "Oberstadt",
+            "Mülheim an der Ruhr",
+            "Gevelsberg",
+            "Dorsten",
+            "Gladbeck",
+            "Oberhausen",
+            "Leverkusen",
+            "Herzogenrath",
+            "Kaldenkirchen",
+            "Menden (Sauerland)",
+            "Herscheid",
+            "Lobberich",
+            "Dülken",
+            "Kempen",
+            "Velbert",
+            "Haltern am See",
+            "Hamm",
+            "Meschede",
+            "Coesfeld",
+            "Hennef",
+            "Dülmen",
+            "Nottuln",
+            "Rheinberg",
+            "Simmerath",
+            "Billerbeck",
+            "Gronau",
+            "Olfen",
+            "Wulfen",
+            "Brakel",
+            "Pulheim",
+            "Lübbecke",
+            "Bergheim",
+            "Neunkirchen-Seelscheid",
+            "Lügde",
+            "Arbeiter Kolonie Haus Maria Veen",
+            "Reichshof",
+            "Paulshöfe",
+            "Mühlenviertel",
+            "Wallhöfe"
+        ]
     }
 
     async getCourierCities(courierId: string): Promise<string[]> {
-        if (this.USE_API) {
-            const response = await apiClient.get<string[]>(API_CDN.COURIER, EndPoints.Couriers.FETCH_CITIES(courierId))
-            return response.success ? response.data! : []
-        }
-
-        const courier = this.couriers.find((c) => c.id === courierId)
-        return courier?.cities || []
+        const response = await apiClient.get<string[]>(API_CDN.COURIER, EndPoints.Couriers.FETCH_CITIES(courierId))
+        return response.success ? response.data! : []
     }
 
     async updateCourierCities(courierId: string, cities: string[]): Promise<boolean> {
-        if (this.USE_API) {
-            const response = await apiClient.put(API_CDN.COURIER, EndPoints.Couriers.UPDATE_CITIES(courierId), {cities})
-            return response.success
-        }
 
-        const courier = this.couriers.find((c) => c.id === courierId)
-        if (courier) {
-            courier.cities = cities
-            return true
-        }
-        return false
+        const response = await apiClient.put(API_CDN.COURIER, EndPoints.Couriers.UPDATE_CITIES(courierId), {cities})
+        return response.success
+
+        //
+        // const courier = this.couriers.find((c) => c.id === courierId)
+        // if (courier) {
+        //     courier.cities = cities
+        //     return true
+        // }
+        // return false
     }
 
     getCourierByLogin(login: string): Courier | null {

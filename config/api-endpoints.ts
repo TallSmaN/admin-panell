@@ -30,7 +30,7 @@ export const EndPoints = {
     // admin
     Products: {
         LIST: "/admin/products",
-        LIST_FOR_COURIER: (courierId: string) => `/products/courier/${courierId}`,
+        LIST_FOR_COURIER: (courierId: string) => `/courier/stock/${courierId}`,
         CREATE: "/admin/product",
         UPDATE: (id: string) => `/admin/product/${id}`,
         DELETE: (id: string) => `/admin/product/${id}`,
@@ -43,8 +43,8 @@ export const EndPoints = {
         CREATE: "/admin/courier",
         UPDATE: (id: string) => `/admin/courier/${id}`,
         DELETE: (id: string) => `/admin/courier/${id}`,
-        FETCH_CITIES: (id: string) => `/courier/${id}/cities`,
-        UPDATE_CITIES: (id: string) => `/courier/${id}/cities`
+        FETCH_CITIES: (id: string) => `/courier/cities/${id}`,
+        UPDATE_CITIES: (id: string) => `/courier/cities/${id}`
     },
 
     Images: {

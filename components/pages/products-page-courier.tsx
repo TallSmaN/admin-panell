@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import type {APIUser, Product, User} from "@/types"
+import type {APIUser, CourierProduct, Product, User} from "@/types"
 import { dataService } from "@/services/data-service"
 import { useSort } from "@/hooks/use-sort"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ interface ProductsPageCourierProps {
 }
 
 export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<CourierProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [editingQuantities, setEditingQuantities] = useState<Record<string, number>>({})
@@ -27,83 +27,46 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
   }, [user])
 
   const loadProducts = async () => {
+    setIsLoading(true)
     try {
-      setIsLoading(true)
+      console.log(user)
       const courierProducts = await dataService.getProductsForCourier(user.id)
       setProducts(Array.isArray(courierProducts) ? courierProducts : [])
-    } catch (error) {
-      console.error("Error loading products:", error)
-      setProducts([])
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Убеждаемся, что sortedData всегда массив
-  const safeData = Array.isArray(sortedData) ? sortedData : []
-
-  const filteredProducts = safeData.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.subcategory.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredProducts = (Array.isArray(sortedData) ? sortedData : []).filter(p =>
+      (p.name + p.subcategory.name).toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const handleQuantityChange = (productId: string, newQuantity: number) => {
-    if (newQuantity < 0) return
-    setEditingQuantities((prev) => ({
-      ...prev,
-      [productId]: newQuantity,
-    }))
+  const getDisplayQuantity = (p: CourierProduct) => editingQuantities[p.id] ?? p.quantity
+
+  const handleQuantityChange = (id: string, qty: number) =>
+      qty >= 0 &&
+      setEditingQuantities(prev => ({ ...prev, [id]: qty }))
+
+  const handleQuickAdjust = (id: string, delta: number) => {
+    const base = editingQuantities[id] ?? products.find(p => p.id === id)?.quantity ?? 0
+    setEditingQuantities(prev => ({ ...prev, [id]: Math.max(0, base + delta) }))
   }
 
-  const handleSaveQuantity = async (productId: string) => {
-    const newQuantity = editingQuantities[productId]
-    if (newQuantity !== undefined) {
-      try {
-        await dataService.updateCourierProductQuantity(productId, user.id, newQuantity)
-        await loadProducts()
-
-        // Убираем из редактируемых
-        setEditingQuantities((prev) => {
-          const updated = { ...prev }
-          delete updated[productId]
-          return updated
-        })
-
-        toast({
-          title: "Количество обновлено",
-          description: "Количество товара успешно изменено",
-        })
-      } catch (error) {
-        console.error("Error updating quantity:", error)
-        toast({
-          title: "Ошибка",
-          description: "Не удалось обновить количество",
-          variant: "destructive",
-        })
-      }
+  const handleSaveQuantity = async (id: string) => {
+    const qty = editingQuantities[id]
+    if (qty === undefined) return
+    try {
+      await dataService.updateCourierProductQuantity(id, user.id, qty)
+      await loadProducts()
+      setEditingQuantities(prev => {
+        const r = { ...prev }
+        delete r[id]
+        return r
+      })
+      toast({ title: "Количество обновлено", description: "Количество товара успешно изменено" })
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось обновить количество", variant: "destructive" })
     }
-  }
-
-  const handleQuickAdjust = (productId: string, adjustment: number) => {
-    const currentProduct = products.find((p) => p.id === productId)
-    if (!currentProduct) return
-
-    const currentQuantity = editingQuantities[productId] ?? currentProduct.stock.total
-    const newQuantity = Math.max(0, currentQuantity + adjustment)
-
-    setEditingQuantities((prev) => ({
-      ...prev,
-      [productId]: newQuantity,
-    }))
-  }
-
-  const isEditing = (productId: string) => {
-    return editingQuantities[productId] !== undefined
-  }
-
-  const getDisplayQuantity = (product: Product) => {
-    return editingQuantities[product.id] ?? product.stock.total
   }
 
   if (isLoading) {
@@ -133,13 +96,13 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProducts.map((product) => (
-          <Card key={product.id} className="relative">
+        {filteredProducts.map(p => (
+          <Card key={p.id} className="relative">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg leading-tight">{product.name}</CardTitle>
+                <CardTitle className="text-lg leading-tight">{p.name}</CardTitle>
                 <Badge variant="outline" className="ml-2 shrink-0">
-                  {product.category.subcategory.name}
+                  {p.subcategory.name}
                 </Badge>
               </div>
             </CardHeader>
@@ -151,15 +114,15 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                     variant="outline"
                     size="icon"
                     className="h-8 w-8 bg-transparent"
-                    onClick={() => handleQuickAdjust(product.id, -1)}
+                    onClick={() => handleQuickAdjust(p.id, -1)}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
 
                   <Input
                     type="number"
-                    value={getDisplayQuantity(product)}
-                    onChange={(e) => handleQuantityChange(product.id, Number.parseInt(e.target.value) || 0)}
+                    value={getDisplayQuantity(p)}
+                    onChange={(e) => handleQuantityChange(p.id, Number.parseInt(e.target.value) || 0)}
                     className="w-20 text-center"
                     min="0"
                   />
@@ -168,7 +131,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                     variant="outline"
                     size="icon"
                     className="h-8 w-8 bg-transparent"
-                    onClick={() => handleQuickAdjust(product.id, 1)}
+                    onClick={() => handleQuickAdjust(p.id, 1)}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -179,7 +142,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdjust(product.id, -5)}
+                  onClick={() => handleQuickAdjust(p.id, -5)}
                   className="flex-1"
                 >
                   -5
@@ -187,7 +150,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdjust(product.id, -10)}
+                  onClick={() => handleQuickAdjust(p.id, -10)}
                   className="flex-1"
                 >
                   -10
@@ -195,7 +158,7 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdjust(product.id, 10)}
+                  onClick={() => handleQuickAdjust(p.id, 10)}
                   className="flex-1"
                 >
                   +10
@@ -203,18 +166,17 @@ export function ProductsPageCourier({ user }: ProductsPageCourierProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdjust(product.id, 50)}
+                  onClick={() => handleQuickAdjust(p.id, 50)}
                   className="flex-1"
                 >
                   +50
                 </Button>
               </div>
 
-              {isEditing(product.id) && (
-                <Button onClick={() => handleSaveQuantity(product.id)} className="w-full" size="sm">
-                  <Check className="mr-2 h-4 w-4" />
-                  Сохранить изменения
-                </Button>
+              {editingQuantities[p.id] !== undefined && (
+                  <Button size="sm" className="w-full" onClick={() => handleSaveQuantity(p.id)}>
+                    <Check className="mr-2 h-4 w-4" /> Сохранить изменения
+                  </Button>
               )}
             </CardContent>
           </Card>

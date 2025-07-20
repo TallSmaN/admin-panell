@@ -178,7 +178,7 @@ export function ProductsPage({user}: ProductsPageProps) {
             label: "Фото",
             render: (imageUrl: string | undefined) => (
                 <div className="w-12 h-12 bg-muted rounded-md overflow-hidden border flex items-center justify-center">
-                    {(() => { console.log(imageUrl); return null })()}
+                    {/*{(() => { console.log(imageUrl); return null })()}*/}
                     {imageUrl ? (
                         <img
                             src={`${API_CDN.ADMIN}/uploads/${imageUrl}`}

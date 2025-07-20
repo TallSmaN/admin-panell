@@ -52,6 +52,7 @@ export default function AdminPanel() {
       case "subcategories":
         return user.isManager ? <SubcategoriesPage /> : null
       case "products":
+        console.log(1)
         return <ProductsPage user={user} />
       case "couriers":
         return user.isManager ? <CouriersPage /> : null
